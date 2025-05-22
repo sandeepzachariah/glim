@@ -22,7 +22,10 @@
 #include <glim/mapping/callbacks.hpp>
 
 #ifdef GTSAM_USE_TBB
+#include <tbb/parallel_for.h>      // declares tbb::parallel_for
+#include <tbb/blocked_range.h>     // declares tbb::blocked_range
 #include <tbb/task_arena.h>
+// namespace tbb = gtsam_points::tbb;
 #endif
 
 namespace glim {

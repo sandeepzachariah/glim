@@ -15,6 +15,28 @@ option(BUILD_WITH_VIEWER "Build with visualizer" ON)
 option(BUILD_WITH_MARCH_NATIVE "Build with -march=native" OFF)
 option(BUILD_WITH_OPENCV "Build with OpenCV to support camera images" ON)
 
+# Switch between pcl::PointXYZ  (OFF)  and pcl::PointXYZI  (ON)
+option(GTSAM_POINTS_USE_INTENSITY
+       "Build with LiDAR intensity support (PointXYZI everywhere)" ON)
+
+# === 2.  Emit the compile definition for every target in this project ======
+if (GTSAM_POINTS_USE_INTENSITY)
+  add_definitions(-DGTSAM_POINTS_USE_INTENSITY)
+endif ()
+
+# ---------------------------------------------------------------------------
+# (rest of your existing CMakeLists.txt stays exactly the same)
+# ---------------------------------------------------------------------------
+
+# === 3.  ***GLIM ONLY*** – ensure the flag is forwarded to gtsam_points ====
+# (skip this block inside gtsam_points itself)
+if (TARGET gtsam_points::gtsam_points)
+  if (GTSAM_POINTS_USE_INTENSITY)
+    target_compile_definitions(gtsam_points::gtsam_points INTERFACE
+                               GTSAM_POINTS_USE_INTENSITY)
+  endif ()
+endif ()
+
 if(BUILD_WITH_MARCH_NATIVE)
   add_definitions(-march=native)
   add_definitions(-DBUILD_WITH_MARCH_NATIVE)
@@ -28,6 +50,15 @@ find_package(GTSAM REQUIRED)
 find_package(gtsam_points REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(spdlog REQUIRED)
+# --------------------------------------------------------------------
+#  PCL  (needed because gtsam_points headers include <pcl/…>)
+# --------------------------------------------------------------------
+find_package(PCL 1.8 REQUIRED COMPONENTS common io)
+
+# Make headers visible to every target that comes later
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 if(BUILD_WITH_VIEWER)
   find_package(Iridescence REQUIRED)
