@@ -369,13 +369,15 @@ void SubMapping::insert_keyframe(const int current, const EstimationFrame::Const
       frame->points[i] = odom_frame->T_lidar_imu.inverse() * frame->points[i];
     }
     frame->add_covs(covariance_estimation->estimate(frame->points_storage, odom_frame->raw_frame->neighbors));
-
+    // copy the intensities to deskewed frame
+    if (odom_frame->raw_frame->intensities.size()) {
+      frame->add_intensities(odom_frame->raw_frame->intensities);
+    }
     deskewed_frame = frame;
   }
 
   // Random sampling for registration error factors
-  gtsam_points::PointCloud::Ptr subsampled_frame = gtsam_points::random_sampling(deskewed_frame, params.keyframe_randomsampling_rate, mt);
-
+  gtsam_points::PointCloud::Ptr subsampled_frame = gtsam_points::random_sampling(deskewed_frame, params.keyframe_randomsampling_rate, mt);  
   EstimationFrame::Ptr keyframe(new EstimationFrame);
   *keyframe = *odom_frame;
 

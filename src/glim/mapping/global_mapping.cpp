@@ -642,10 +642,20 @@ std::vector<Eigen::Vector4d> GlobalMapping::export_points() {
 
   std::vector<Eigen::Vector4d> all_points;
   all_points.reserve(num_all_points);
-
   for (const auto& submap : submaps) {
     std::transform(submap->frame->points, submap->frame->points + submap->frame->size(), std::back_inserter(all_points), [&](const Eigen::Vector4d& p) {
-      return submap->T_world_origin * p;
+      Eigen::Vector4d q = submap->T_world_origin * p;          // xyz (w = weight)
+
+      // ----------- new lines: copy the real intensity ------------
+      if (submap->frame->intensities) {
+        std::size_t idx = &p - submap->frame->points;          // current point index
+        q.w() = submap->frame->intensities[idx];               // overwrite w with intensity
+      } else {
+        q.w() = 0.0;                                           // fallback if field is absent
+      }
+      // ----------------------------------------------------------
+
+      return q;
     });
   }
 
