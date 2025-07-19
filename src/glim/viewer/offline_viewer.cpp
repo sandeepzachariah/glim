@@ -219,7 +219,7 @@ bool OfflineViewer::export_map(guik::ProgressInterface& progress, const std::str
 
   progress.set_text("Writing to file");
   progress.increment();
-
+  glk::save_ply_binary(path, points);
   return true;
 }
 

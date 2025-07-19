@@ -642,12 +642,8 @@ glk::PLYData GlobalMapping::export_points() {
       Eigen::Vector3f point = (submap->T_world_origin * submap->frame->points[i]).head<3>().cast<float>();
       ply_data.vertices.push_back(point);
 
-      if (submap->frame->has_intensities()) {
-        std::cout << "INTENSITIES PRESENT" << std::endl;  
+      if (submap->frame->has_intensities()) { 
         ply_data.intensities.push_back(submap->frame->intensities[i]);
-      }
-      else {
-        std::cout << "INTENSITIES NOT PRESENT" << std::endl;
       }
     }
   }
